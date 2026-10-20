@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#1F3864">
+<title>公司好坏指数 · 你的公司值不值得再待一年</title>
+<meta name="description" content="20 道题，5 分钟，测出你该不该继续待在这家公司。">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+:root{
+  --ink:#1A1A1A; --grey:#8E8E8E; --lgrey:#C8C8C8; --line:#EAEAEA;
+  --navy:#1F3864; --red:#B04A48;
+}
+html,body{height:100%;width:100%;overflow-x:hidden}
+body{
+  background:#fff;color:var(--ink);
+  font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+  -webkit-font-smoothing:antialiased;
+  line-height:1.5;
+}
+.wrap{width:100%;max-width:480px;margin:0 auto;min-height:100%;position:relative;overflow-x:hidden}
+
+/* ---------- 通用 ---------- */
+.screen{display:none;padding:30px 24px 48px;min-height:100vh;overflow:hidden}
+.screen.active{display:block;animation:fade .32s ease both}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.kicker{font-size:11px;letter-spacing:.34em;color:var(--lgrey);font-weight:500}
+.brandline{display:flex;align-items:center;gap:8px;margin-bottom:34px}
+.dot{width:7px;height:7px;background:var(--navy);flex:none}
+.btn{
+  width:100%;height:56px;border:none;background:var(--navy);color:#fff;
+  font-size:16px;letter-spacing:.06em;font-weight:600;border-radius:3px;
+  font-family:inherit;cursor:pointer;transition:opacity .18s;
+}
+.btn:active{opacity:.78}
+.btn.ghost{background:#fff;color:var(--navy);border:1px solid var(--line)}
+.tiny{font-size:12px;color:var(--lgrey);text-align:center;margin-top:18px;line-height:1.7}
+
+/* ---------- 首页 ---------- */
+#s-intro{padding-top:64px}
+#s-intro h1{
+  font-size:38px;line-height:1.28;font-weight:800;color:var(--navy);
+  letter-spacing:-.01em;margin:0 0 6px;
+}
+#s-intro h1 span{color:var(--ink)}
+.accent{width:44px;height:5px;background:var(--red);margin:26px 0 28px}
+#s-intro .lead{font-size:15px;color:#4A4A4A;line-height:1.9;margin-bottom:34px}
+#s-intro .lead b{color:var(--red);font-weight:700}
+.homebottom{margin-top:44px}
+
+/* ---------- 答题 ---------- */
+.qbar{position:fixed;top:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;height:2px;background:var(--line);z-index:50}
+.qbar-fill{height:100%;background:var(--navy);width:0;transition:width .3s ease}
+.qtop{display:flex;justify-content:space-between;align-items:center;margin:0 0 0;font-size:12px;color:var(--lgrey);letter-spacing:.1em}
+.qdim{color:var(--navy);font-weight:600}
+#qtext{
+  font-size:23px;line-height:1.55;font-weight:700;margin:26px 0 30px;
+  letter-spacing:-.01em;min-height:62px;
+}
+.opts{display:flex;flex-direction:column;gap:10px}
+.opt{
+  border:1px solid var(--line);background:#fff;border-radius:3px;
+  padding:15px 16px;font-size:15px;color:#3A3A3A;text-align:left;
+  font-family:inherit;cursor:pointer;display:flex;gap:12px;align-items:flex-start;
+  transition:border-color .16s,background .16s;line-height:1.5;
+}
+.opt:active{background:#F7F7F5;border-color:var(--navy)}
+.opt .ab{color:var(--lgrey);font-weight:700;flex:none;width:14px}
+.opt.on{border-color:var(--navy);background:#F6F8FB}
+.opt.on .ab{color:var(--navy)}
+.backbtn{
+  background:none;border:none;color:var(--lgrey);font-size:13px;
+  font-family:inherit;padding:22px 0 0;cursor:pointer;
+}
+.backbtn:active{color:var(--navy)}
+
+/* ---------- 锁定页 ---------- */
+.locktop{margin-top:16px}
+.lockcard{border:1px solid var(--line);border-radius:3px;padding:30px 22px;text-align:center;margin:0 0 26px}
+.scoremask{
+  font-size:64px;font-weight:800;color:var(--navy);letter-spacing:.04em;
+  line-height:1;margin-bottom:14px;font-variant-numeric:tabular-nums;
+}
+.scoremask small{font-size:20px;color:var(--lgrey);font-weight:600;margin-left:4px}
+.lockcard p{font-size:14px;color:#4A4A4A;line-height:1.8}
+.lockcard p b{color:var(--red)}
+.radarwrap{text-align:center;margin:0 0 8px}
+.radarwrap svg{width:230px;height:230px}
+.legend{display:flex;flex-wrap:wrap;justify-content:center;gap:6px 14px;margin:6px 0 26px}
+.legend span{font-size:11px;color:var(--lgrey);letter-spacing:.06em}
+.legend span.on{color:var(--navy);font-weight:600}
+.unlockbox{margin-top:6px}
+.unlockrow{display:flex;gap:8px}
+.unlockrow input{
+  flex:1;min-width:0;height:52px;border:1px solid var(--line);border-radius:3px;
+  padding:0 14px;font-size:15px;font-family:inherit;color:var(--ink);outline:none;
+  letter-spacing:.06em;
+}
+.unlockrow input:focus{border-color:var(--navy)}
+.unlockrow button{
+  width:96px;height:52px;border:none;background:var(--navy);color:#fff;
+  font-size:15px;font-family:inherit;font-weight:600;border-radius:3px;cursor:pointer;
+}
+.unlockrow button:active{opacity:.8}
+.hint{font-size:12px;color:var(--lgrey);margin-top:12px;line-height:1.7;min-height:18px}
+.hint.err{color:var(--red)}
+
+/* ---------- 结果页 ---------- */
+.restop{text-align:center;margin:10px 0 0}
+.reslabel{font-size:11px;letter-spacing:.32em;color:var(--lgrey);margin-bottom:12px}
+.bigscore{
+  font-size:82px;font-weight:800;line-height:1;color:var(--navy);
+  font-variant-numeric:tabular-nums;letter-spacing:-.02em;
+}
+.bigscore small{font-size:22px;color:var(--lgrey);font-weight:600;margin-left:2px}
+.tier{display:inline-block;margin:14px 0 4px;font-size:15px;font-weight:700;letter-spacing:.04em;padding:6px 14px;border-radius:99px}
+.tier.t1{background:#EAF0F6;color:#1F3864}
+.tier.t2{background:#EAF0F6;color:#1F3864}
+.tier.t3{background:#FAF2E8;color:#8A6534}
+.tier.t4{background:#FBEEEC;color:#A5403E}
+.tier.t5{background:#B04A48;color:#fff}
+.verdict{font-size:17px;line-height:1.8;font-weight:700;color:var(--ink);margin:18px 6px 0;letter-spacing:-.01em}
+.verdict em{font-style:normal;color:var(--red)}
+.sec{margin-top:34px}
+.sechead{display:flex;align-items:center;gap:8px;margin-bottom:16px}
+.sechead i{width:6px;height:6px;background:var(--navy);flex:none;display:block}
+.sechead h3{font-size:13px;font-weight:700;letter-spacing:.14em;color:var(--navy)}
+.dimrow{margin-bottom:14px}
+.dimtop{display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px}
+.dimtop .nm{font-weight:600;color:#2A2A2A}
+.dimtop .sc{font-variant-numeric:tabular-nums;color:var(--grey)}
+.bar{height:5px;background:#F0F0EE;border-radius:99px;overflow:hidden}
+.bar i{display:block;height:100%;border-radius:99px;width:0;transition:width .75s cubic-bezier(.2,.8,.2,1)}
+.dimtip{font-size:12px;color:var(--grey);margin-top:5px;line-height:1.6}
+.weakcard{border:1px solid #F0DFDD;background:#FDF8F7;border-radius:3px;padding:18px;margin-top:6px}
+.weakcard .wt{font-size:12px;color:var(--red);font-weight:700;letter-spacing:.06em;margin-bottom:8px}
+.weakcard .wc{font-size:15px;line-height:1.75;color:#2A2A2A;font-weight:600}
+.weakcard .wd{font-size:13px;line-height:1.8;color:#5A5A5A;margin-top:8px}
+.acts{list-style:none;margin-top:4px}
+.acts li{font-size:14px;line-height:1.85;color:#3A3A3A;padding-left:18px;position:relative;margin-bottom:10px}
+.acts li:before{content:"";position:absolute;left:0;top:9px;width:7px;height:1.5px;background:var(--navy)}
+.ruler{margin-top:8px}
+.rulerline{display:flex;height:8px;border-radius:99px;overflow:hidden;margin-bottom:8px}
+.rulerline i{flex:none}
+.rulerlab{display:flex;justify-content:space-between;font-size:10px;color:var(--lgrey);letter-spacing:.02em}
+.footnote{font-size:12px;color:var(--lgrey);line-height:1.9;margin-top:30px;text-align:center}
+.sharebtn{margin-top:26px}
+.disclaim{font-size:11px;color:#C0C0C0;line-height:1.9;margin-top:26px;padding-top:18px;border-top:1px solid var(--line)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ============ 首页 ============ -->
+  <section class="screen active" id="s-intro">
+    <div class="brandline"><span class="dot"></span><span class="kicker">COMPANY INDEX</span></div>
+    <h1>你的公司<br>值不值得<br><span>再待一年</span></h1>
+    <div class="accent"></div>
+    <p class="lead">
+      20 道题，5 分钟。<br>
+      题目和选项我全公开，<b>分数不公开</b>。<br>
+      因为算分要看你每一项的分量，<br>还要看你会不会有一项烂到底。
+    </p>
+    <button class="btn" id="btn-start">开始测评</button>
+    <p class="tiny">20 题 · 无需注册 · 不收集任何个人信息</p>
+    <div class="homebottom">
+      <p class="tiny">本测评为情绪与状态自评工具，不构成任何职业建议。</p>
+    </div>
+  </section>
+
+  <!-- ============ 答题 ============ -->
+  <section class="screen" id="s-quiz">
+    <div class="qbar"><div class="qbar-fill" id="qbar"></div></div>
+    <div class="qtop"><span id="qidx">01 / 20</span><span class="qdim" id="qdim">工资水平</span></div>
+    <h2 id="qtext">题目</h2>
+    <div class="opts" id="opts"></div>
+    <button class="backbtn" id="btn-back">← 上一题</button>
+  </section>
+
+  <!-- ============ 锁定页 ============ -->
+  <section class="screen" id="s-lock">
+    <div class="brandline"><span class="dot"></span><span class="kicker">RESULT LOCKED</span></div>
+    <div class="lockcard">
+      <div class="scoremask" id="maskScore">??<small>/100</small></div>
+      <p>20 题已经答完，你的分数<b>已经算出来了</b>。<br>但我不会直接告诉你。</p>
+    </div>
+
+    <div class="radarwrap"><svg id="radarLock" viewBox="0 0 240 240"></svg></div>
+    <div class="legend" id="legendLock"></div>
+
+    <div class="unlockbox">
+      <div class="unlockrow">
+        <input id="code" type="text" inputmode="text" autocapitalize="characters" placeholder="输入解锁码" maxlength="20">
+        <button id="btn-unlock">解锁</button>
+      </div>
+      <p class="hint" id="hint"></p>
+    </div>
+    <p class="tiny" style="margin-top:26px">看到那个凹陷了吗？<br>那就是拖后腿的地方。至于是哪一项，得看分数。</p>
+    <p class="tiny" style="margin-top:14px;color:#B8B8B8">请在同一台设备上完成测评与解锁，答案只存在你的手机里。</p>
+    <button class="backbtn" id="btn-restart" style="display:block;margin:10px auto 0">重新测一次</button>
+  </section>
+
+  <!-- ============ 结果页 ============ -->
+  <section class="screen" id="s-result">
+    <div class="brandline"><span class="dot"></span><span class="kicker">COMPANY INDEX · REPORT</span></div>
+
+    <div class="restop">
+      <div class="reslabel">你的公司好坏指数</div>
+      <div class="bigscore" id="bigscore">0<small>/100</small></div>
+      <div><span class="tier" id="tier">—</span></div>
+    </div>
+    <p class="verdict" id="verdict"></p>
+
+    <div class="sec">
+      <div class="sechead"><i></i><h3>SIX DIMENSIONS</h3></div>
+      <div id="dims"></div>
+    </div>
+
+    <div class="sec">
+      <div class="sechead"><i></i><h3>YOUR SHORTEST BOARD</h3></div>
+      <div class="weakcard">
+        <div class="wt">最拖后腿的一项</div>
+        <div class="wc" id="weakName">—</div>
+        <div class="wd" id="weakDesc">—</div>
+      </div>
+    </div>
+
+    <div class="sec">
+      <div class="sechead"><i></i><h3>WHAT TO DO</h3></div>
+      <ul class="acts" id="acts"></ul>
+    </div>
+
+    <div class="sec">
+      <div class="sechead"><i></i><h3>SCALE</h3></div>
+      <div class="ruler">
+        <div class="rulerline" id="ruler"></div>
+        <div class="rulerlab"><span>1</span><span>40</span><span>55</span><span>70</span><span>85</span><span>100</span></div>
+      </div>
+    </div>
+
+    <button class="btn ghost sharebtn" id="btn-again">重新测一次</button>
+    <p class="disclaim">
+      说明：本测评基于主观自评，权重与封顶规则由作者设定，用于梳理状态而非预测结果。<br>
+      分数高低不代表你的能力，只代表你此刻在这家公司的处境。
+    </p>
+  </section>
+
+</div>
+
+<script>
+/* =========================================================
+   1. 题库
+   ========================================================= */
+var DIMS = [
+  { key:'pay', name:'工资水平', color:'#B04A48', weight:25,
+    qs:[
+      { t:'发薪日看到到账短信，你的第一反应是：',
+        o:['还行，这个月值了','没什么感觉，就那样','有点想骂人','已经很久不看工资条了'] },
+      { t:'算上加班通勤，你的时薪比奶茶店高吗：',
+        o:['明显更高','差不多','可能还不如','不敢算'] },
+      { t:'你上一次涨薪：',
+        o:['一年内，幅度满意','一年内，只有几百块','两年以上没涨过','涨过，但活涨得更多'] }
+    ],
+    tipLow:'你的问题可能不是能力，是定价。同城同岗，你可能一直在被低估。' },
+
+  { key:'benefit', name:'福利待遇', color:'#C08A3E', weight:10,
+    qs:[
+      { t:'五险一金：',
+        o:['按实际工资全额缴','按最低基数缴','只有五险，没公积金','转正后才缴 / 没查过'] },
+      { t:'请假：',
+        o:['想请就请，没人多问','能请，但要理由还得代班','请假像欠了公司钱','年假从来没休完过'] },
+      { t:'加班：',
+        o:['有加班费或调休','没有，但也不常加','没有，而且经常加','加班是默认的，提钱是禁忌'] }
+    ],
+    tipLow:'这家公司把你当成本，不是资产。福利是态度，不是恩赐。' },
+
+  { key:'people', name:'领导同事', color:'#1F3864', weight:22,
+    qs:[
+      { t:'领导晚上10点给你发消息：',
+        o:['第二天回，他也不说什么','得回，心里骂一句','秒回，不回就有事','已经习惯，手机不敢静音'] },
+      { t:'你参与的项目做成了，功劳：',
+        o:['是你的，会上点了你名','团队的，也提到了你','是领导的','不知道是谁的，没人提你'] },
+      { t:'出了问题的时候：',
+        o:['领导先问情况，再解决','先问「你怎么搞的」再解决','先找个人背锅','那个人一定是我'] },
+      { t:'你的同事里：',
+        o:['有一两个能一起吐槽的','都还行，但没一个能说真话','有一个我每天想绕开','全员表演，包括我'] }
+    ],
+    tipLow:'八成的离职原因写在这一项。这一项低，其他项再高也留不住你——因为人不是被工作累走的，是被关系耗走的。' },
+
+  { key:'growth', name:'技能提升', color:'#4C7A6A', weight:15,
+    qs:[
+      { t:'过去一年，你学会的新东西：',
+        o:['有，能写进简历','有，但只在这公司有用','主要是学会怎么应付人','没有，在吃三年前的老本'] },
+      { t:'如果明天离职，你的简历：',
+        o:['比一年前更好看','差不多','只能写负责XX，没成果','我都不敢打开'] },
+      { t:'公司愿不愿意为你花钱：',
+        o:['有预算，而且真能用','有，但都是走形式','只教你怎么用内部系统','培训在下班后，还自费'] }
+    ],
+    tipLow:'你现在干的活，三年后可能不值钱了。工资是当下的价格，能力是未来的价格。' },
+
+  { key:'future', name:'发展前景', color:'#2E5578', weight:20,
+    qs:[
+      { t:'你上面那个位置：',
+        o:['有人升上去过，路径清楚','有，但要等很久','那个位置三年没人动过','那个位置是老板亲戚的'] },
+      { t:'三年后你还在这个岗位：',
+        o:['会升一级，我知道怎么升','可能换个部门','做同样的活，只是更熟练','公司在不在都不好说'] },
+      { t:'公司最近的动向：',
+        o:['在扩张，在招人','稳定，没什么变化','在优化，在讲降本增效','已经走了三分之一的人'] }
+    ],
+    tipLow:'结构堵死了，努力换不来位置。这不是你的问题，是通道的问题。' },
+
+  { key:'space', name:'办公环境', color:'#708093', weight:8,
+    qs:[
+      { t:'通勤：',
+        o:['30分钟内','1小时内','1.5小时以上','通勤花掉半个工作日'] },
+      { t:'你的工位：',
+        o:['有窗，能看见天','格子间，还行','没固定工位，在过道','大部分时间在会议室'] },
+      { t:'厕所和茶水间：',
+        o:['干净，纸一直是满的','一般，能用','纸经常没有','我宁愿去楼下商场'] }
+    ],
+    tipLow:'每天多花两小时在路上，一年多花 500 小时。这不是小事，这是你的命。' }
+];
+
+var CALIB = { t:'如果明天有一份薪水差不多的工作，你会：',
+  o:['不会考虑，我在这儿挺好的','会看一眼，但不一定去','会立刻投简历','我已经在投了'] };
+
+/* 扁平化：每题带上所属维度 */
+var FLAT = [];
+DIMS.forEach(function(d){
+  d.qs.forEach(function(q,i){
+    FLAT.push({ dimKey:d.key, dimName:d.name, color:d.color, text:q.t, opts:q.o, inDim:i });
+  });
+});
+FLAT.push({ dimKey:'calib', dimName:'最后一道', color:'#708093', text:CALIB.t, opts:CALIB.o, inDim:0 });
+
+/* =========================================================
+   2. 计分（权重 + 短板封顶，均不对外展示）
+   ========================================================= */
+function calc(answers){
+  var dimScores = {};
+  DIMS.forEach(function(d){
+    var sum = 0, n = 0;
+    FLAT.forEach(function(f, idx){
+      if (f.dimKey === d.key){ sum += answers[idx]; n++; }
+    });
+    dimScores[d.key] = (3 - sum / n) / 3 * 100;   // A→100 分，D→0 分
+  });
+
+  var weighted = 0;
+  DIMS.forEach(function(d){ weighted += dimScores[d.key] * d.weight / 100; });
+
+  // 修正一：真实离职意愿（最后一题选 D）
+  var flagged = false, capped = null;
+  if (answers[FLAT.length - 1] === 3){ weighted *= 0.8; flagged = true; }
+
+  // 修正二：任一维度烂到底 —— 短板效应
+  var minVal = 100, minKey = null;
+  DIMS.forEach(function(d){
+    if (dimScores[d.key] < minVal){ minVal = dimScores[d.key]; minKey = d.key; }
+  });
+  if (minVal < 35 && weighted > 65){ weighted = 65; capped = 'min'; }
+
+  // 修正三：领导同事偏低（八成的离职真凶）
+  if (dimScores.people < 42 && weighted > 68){ weighted = 68; capped = 'peopleMid'; }
+  if (dimScores.people < 25 && weighted > 55){ weighted = 55; capped = 'people'; }
+
+  var total = Math.round(weighted);
+  total = Math.max(1, Math.min(100, total));
+
+  return { total:total, dims:dimScores, minKey:minKey, minVal:minVal,
+           flagged:flagged, capped:capped };
+}
+
+var TIERS = [
+  { min:85, cls:'t1', name:'优质留任区',
+    v:'你可能不知道自己有多幸运。<em>这里的问题不是走不走，是怎么拿更多。</em>',
+    acts:['把这次的结果当成筹码，主动谈一次薪资或职级。',
+          '别只看钱：争取一个能写进简历的项目署名。',
+          '把这里当成跳板经营人脉，而不是养老。'] },
+  { min:70, cls:'t2', name:'好公司 · 可以待',
+    v:'有毛病，但在市场平均线以上。<em>别因为一次吵架就辞职。</em>',
+    acts:['找出真正让你不舒服的那一项，能谈就先谈一次。',
+          '把吐槽变成提案：带着方案去找领导，而不是带着情绪。',
+          '保持每年一次外部面试，知道自己的市价。'] },
+  { min:55, cls:'t3', name:'灰色地带 · 骑驴找马',
+    v:'不是你不行，是这里给你的增量越来越少了。',
+    acts:['不裸辞。但从今天起，把简历更新到随时能投的状态。',
+          '每季度投三家，不一定要去，但要让自己有得选。',
+          '把当前工作里能带走的东西（案例、数据、方法论）整理出来。'] },
+  { min:40, cls:'t4', name:'预警区 · 该准备了',
+    v:'再留一年，你在市场上的议价能力就掉一档。',
+    acts:['这周就开始面试，先拿一个 offer 当锚点，哪怕不去。',
+          '别再等"明年给我争取"，把它当成不会再发生的事。',
+          '算清楚裸辞的现金底线，心里有数就不慌了。'] },
+  { min:1, cls:'t5', name:'建议辞职',
+    v:'这里已经在消耗你，不是雇佣你。',
+    acts:['先保身体，再保收入。睡眠和情绪是硬指标，不是矫情。',
+          '设定一个明确的时间点，比如三个月内必须有结果。',
+          '别在被消耗的状态下做长期决定，先离开，再规划。'] }
+];
+
+function tierOf(s){ for (var i=0;i<TIERS.length;i++){ if (s>=TIERS[i].min) return TIERS[i]; } return TIERS[4]; }
+
+/* =========================================================
+   3. 交互
+   ========================================================= */
+var answers = [];
+var cur = 0;
+var storeKey = 'ci_answers_v1';
+var unlockKey = 'ci_unlocked_v1';
+
+/* —— 解锁码：改这里就能换码，可写多个 —— */
+var CODES = ['GPP2026'];
+
+function $(id){ return document.getElementById(id); }
+function show(id){
+  var ss = document.querySelectorAll('.screen');
+  for (var i=0;i<ss.length;i++) ss[i].classList.remove('active');
+  $(id).classList.add('active');
+  window.scrollTo(0,0);
+}
+
+function renderQ(){
+  var f = FLAT[cur];
+  $('qidx').textContent = ('0'+(cur+1)).slice(-2) + ' / ' + FLAT.length;
+  $('qdim').textContent = f.dimName;
+  $('qtext').textContent = f.text;
+  $('qbar').style.width = ((cur)/FLAT.length*100) + '%';
+
+  var box = $('opts');
+  box.innerHTML = '';
+  f.opts.forEach(function(txt, i){
+    var b = document.createElement('button');
+    b.className = 'opt' + (answers[cur]===i ? ' on' : '');
+    b.innerHTML = '<span class="ab">' + 'ABCD'[i] + '</span><span>' + txt + '</span>';
+    b.onclick = function(){
+      answers[cur] = i;
+      var nodes = box.querySelectorAll('.opt');
+      for (var k=0;k<nodes.length;k++) nodes[k].classList.remove('on');
+      b.classList.add('on');
+      setTimeout(next, 170);
+    };
+    box.appendChild(b);
+  });
+
+  $('btn-back').style.visibility = cur === 0 ? 'hidden' : 'visible';
+}
+
+function next(){
+  if (cur < FLAT.length - 1){ cur++; renderQ(); }
+  else { finish(); }
+}
+
+function finish(){
+  try { localStorage.setItem(storeKey, JSON.stringify(answers)); } catch(e){}
+  $('qbar').style.width = '100%';
+  if (isUnlocked()) { renderResult(); } else { renderLock(); }
+}
+
+function isUnlocked(){
+  try { return localStorage.getItem(unlockKey) === '1'; } catch(e){ return false; }
+}
+
+/* =========================================================
+   4. 雷达图
+   ========================================================= */
+function polar(cx, cy, r, i, n){
+  var a = -Math.PI/2 + i * 2*Math.PI/n;
+  return [cx + Math.cos(a)*r, cy + Math.sin(a)*r];
+}
+
+function drawRadar(svg, values, masked){
+  var cx = 120, cy = 120, R = 88, n = 6;
+  var NS = 'http://www.w3.org/2000/svg';
+  while (svg.firstChild) svg.removeChild(svg.firstChild);
+
+  // 网格
+  [0.33, 0.66, 1].forEach(function(f){
+    var pts = [];
+    for (var i=0;i<n;i++){ var p = polar(cx,cy,R*f,i,n); pts.push(p[0].toFixed(1)+','+p[1].toFixed(1)); }
+    var pl = document.createElementNS(NS,'polygon');
+    pl.setAttribute('points', pts.join(' '));
+    pl.setAttribute('fill','none');
+    pl.setAttribute('stroke','#EFEFEF');
+    pl.setAttribute('stroke-width','1');
+    svg.appendChild(pl);
+  });
+  // 轴线
+  for (var i=0;i<n;i++){
+    var p = polar(cx,cy,R,i,n);
+    var ln = document.createElementNS(NS,'line');
+    ln.setAttribute('x1',cx); ln.setAttribute('y1',cy);
+    ln.setAttribute('x2',p[0]); ln.setAttribute('y2',p[1]);
+    ln.setAttribute('stroke','#F2F2F2'); ln.setAttribute('stroke-width','1');
+    svg.appendChild(ln);
+  }
+
+  // 数据多边形
+  var pts = [];
+  for (var j=0;j<n;j++){
+    var r = Math.max(6, R * (values[j]/100));
+    var pp = polar(cx,cy,r,j,n);
+    pts.push(pp[0].toFixed(1)+','+pp[1].toFixed(1));
+  }
+  var poly = document.createElementNS(NS,'polygon');
+  poly.setAttribute('points', pts.join(' '));
+  poly.setAttribute('fill','rgba(31,56,100,.10)');
+  poly.setAttribute('stroke', masked ? '#B9B9B9' : '#1F3864');
+  poly.setAttribute('stroke-width','1.6');
+  svg.appendChild(poly);
+
+  // 顶点
+  for (var k=0;k<n;k++){
+    var r2 = Math.max(6, R * (values[k]/100));
+    var q = polar(cx,cy,r2,k,n);
+    var c = document.createElementNS(NS,'circle');
+    c.setAttribute('cx',q[0]); c.setAttribute('cy',q[1]); c.setAttribute('r','2.6');
+    c.setAttribute('fill', masked ? '#C8C8C8' : DIMS[k].color);
+    svg.appendChild(c);
+  }
+}
+
+/* =========================================================
+   5. 锁定页
+   ========================================================= */
+function renderLock(){
+  var r = calc(answers);
+  drawRadar($('radarLock'), DIMS.map(function(d){ return r.dims[d.key]; }), true);
+
+  var lg = $('legendLock');
+  lg.innerHTML = '';
+  DIMS.forEach(function(d){
+    var s = document.createElement('span');
+    s.textContent = '????';
+    lg.appendChild(s);
+  });
+  show('s-lock');
+  $('hint').className = 'hint';
+  $('hint').textContent = '';
+}
+
+/* =========================================================
+   6. 结果页
+   ========================================================= */
+var rafId = null;
+
+function renderResult(){
+  var r = calc(answers);
+  var t = tierOf(r.total);
+
+  $('tier').className = 'tier ' + t.cls;
+  $('tier').textContent = t.name;
+  $('verdict').innerHTML = t.v;
+  drawRadar($('radarLock'), DIMS.map(function(d){ return r.dims[d.key]; }), false);
+
+  // 六维明细
+  var box = $('dims');
+  box.innerHTML = '';
+  DIMS.forEach(function(d){
+    var v = Math.round(r.dims[d.key]);
+    var row = document.createElement('div');
+    row.className = 'dimrow';
+    var tipTxt = (v < 40) ? d.tipLow : (v >= 75 ? '这一项还不错，别把它当成理所当然。' : '中间地带：能用，但不值得你为它留下来。');
+    row.innerHTML =
+      '<div class="dimtop"><span class="nm">' + d.name + '</span><span class="sc">' + v + '</span></div>' +
+      '<div class="bar"><i style="background:' + d.color + '"></i></div>' +
+      '<div class="dimtip">' + tipTxt + '</div>';
+    box.appendChild(row);
+    setTimeout(function(){ row.querySelector('.bar i').style.width = v + '%'; }, 60);
+  });
+
+  // 短板
+  var weak = DIMS.filter(function(d){ return d.key === r.minKey; })[0] || DIMS[0];
+  $('weakName').textContent = weak.name + ' · ' + Math.round(r.minVal) + ' 分';
+  var extra = '';
+  if (r.capped === 'people') extra = ' 因为你这一项过低，总分被直接压到了 55 分以下——这是整套题里唯一一条硬规则。';
+  else if (r.capped === 'min') extra = ' 因为这一项烂到底，其他项再好，总分也被压住了。';
+  else if (r.flagged) extra = ' 而且你在最后一题选了「已经在投了」——你的身体比答案更早知道要走。';
+  $('weakDesc').textContent = weak.tipLow + extra;
+
+  // 行动
+  var ul = $('acts');
+  ul.innerHTML = '';
+  t.acts.forEach(function(a){
+    var li = document.createElement('li');
+    li.textContent = a;
+    ul.appendChild(li);
+  });
+
+  // 标尺
+  var ruler = $('ruler');
+  ruler.innerHTML =
+    '<i style="width:39%;background:#F3E7E5"></i>' +
+    '<i style="width:15%;background:#FBF2E4"></i>' +
+    '<i style="width:15%;background:#EAF0F6"></i>' +
+    '<i style="width:15%;background:#DCE6F0"></i>' +
+    '<i style="width:16%;background:#C9D8E8"></i>';
+
+  show('s-result');
+
+  // 分数滚动
+  var el = $('bigscore'), target = r.total, t0 = null;
+  if (rafId) cancelAnimationFrame(rafId);
+  function step(ts){
+    if (!t0) t0 = ts;
+    var p = Math.min(1, (ts - t0) / 850);
+    var e = 1 - Math.pow(1 - p, 3);
+    el.innerHTML = Math.round(target * e) + '<small>/100</small>';
+    if (p < 1) rafId = requestAnimationFrame(step);
+  }
+  rafId = requestAnimationFrame(step);
+}
+
+/* =========================================================
+   7. 绑定
+   ========================================================= */
+$('btn-start').onclick = function(){
+  answers = new Array(FLAT.length);
+  cur = 0;
+  renderQ();
+  show('s-quiz');
+};
+
+$('btn-back').onclick = function(){
+  if (cur > 0){ cur--; renderQ(); }
+};
+
+$('btn-unlock').onclick = function(){
+  var v = ($('code').value || '').trim().toUpperCase();
+  if (!v){ $('hint').className='hint err'; $('hint').textContent = '先输入解锁码。'; return; }
+  if (CODES.indexOf(v) >= 0){
+    try { localStorage.setItem(unlockKey,'1'); } catch(e){}
+    renderResult();
+  } else {
+    $('hint').className = 'hint err';
+    $('hint').textContent = '这个码不对，再看看。';
+  }
+};
+
+$('code').addEventListener('keydown', function(e){
+  if (e.key === 'Enter') $('btn-unlock').click();
+});
+
+function restart(){
+  answers = new Array(FLAT.length);
+  cur = 0;
+  // 如需"付费一次可无限重测"，删掉下面这一行
+  try { localStorage.removeItem(unlockKey); } catch(e){}
+  renderQ();
+  show('s-quiz');
+}
+$('btn-again').onclick = restart;
+$('btn-restart').onclick = restart;
+
+/* 回访：有答案且已解锁，直接看结果 */
+(function boot(){
+  try {
+    var raw = localStorage.getItem(storeKey);
+    if (raw){
+      var a = JSON.parse(raw);
+      if (a && a.length === FLAT.length && a.every(function(x){ return typeof x === 'number'; })){
+        answers = a;
+        if (isUnlocked()){ renderResult(); }
+      }
+    }
+  } catch(e){}
+})();
+</script>
+</body>
+</html>
