@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="theme-color" content="#1F3864">
 <title>公司好坏指数 · 你的公司值不值得再待一年</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%231F3864'/%3E%3C/svg%3E">
 <meta name="description" content="20 道题，5 分钟，测出你该不该继续待在这家公司。">
 <style>
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
@@ -12,17 +13,17 @@
   --ink:#1A1A1A; --grey:#8E8E8E; --lgrey:#C8C8C8; --line:#EAEAEA;
   --navy:#1F3864; --red:#B04A48;
 }
-html,body{height:100%;width:100%;overflow-x:hidden}
+html,body{min-height:100%;width:100%;overflow-x:hidden}
 body{
   background:#fff;color:var(--ink);
   font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
   -webkit-font-smoothing:antialiased;
   line-height:1.5;
 }
-.wrap{width:100%;max-width:480px;margin:0 auto;min-height:100%;position:relative;overflow-x:hidden}
+.wrap{width:100%;max-width:480px;margin:0 auto;min-height:100vh;position:relative;overflow-x:hidden}
 
 /* ---------- 通用 ---------- */
-.screen{display:none;padding:30px 24px 48px;min-height:100vh;overflow:hidden}
+.screen{display:none;padding:30px 24px 48px;min-height:100vh;overflow-x:hidden}
 .screen.active{display:block;animation:fade .32s ease both}
 @keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 .kicker{font-size:11px;letter-spacing:.34em;color:var(--lgrey);font-weight:500}
