@@ -153,6 +153,14 @@ body{
 .rulerlab{display:flex;justify-content:space-between;font-size:10px;color:var(--lgrey);letter-spacing:.02em}
 .footnote{font-size:12px;color:var(--lgrey);line-height:1.9;margin-top:30px;text-align:center}
 .sharebtn{margin-top:26px}
+#s-intro .btn{margin-top:24px}
+.lastres{font-size:12.5px;color:#8E8E8E;margin:16px 0 0}
+.lastres a{color:var(--navy);font-weight:700;text-decoration:none;border-bottom:1px solid #C8D3E2;padding-bottom:1px}
+.introcard{margin:28px 0 2px;border-top:1px solid var(--line)}
+.introrow{display:flex;gap:13px;padding:15px 0;border-bottom:1px solid var(--line)}
+.introrow .n{flex:none;font-size:11px;font-weight:700;color:var(--red);letter-spacing:.06em;padding-top:4px}
+.introrow b{display:block;font-size:14px;color:var(--ink);letter-spacing:.02em;margin-bottom:5px}
+.introrow p{font-size:13px;line-height:1.78;color:#6E6E6E;margin:0;letter-spacing:.01em}
 .disclaim{font-size:11px;color:#C0C0C0;line-height:1.9;margin-top:26px;padding-top:18px;border-top:1px solid var(--line)}
 .pctband{border:1px solid var(--line);border-radius:12px;padding:16px 18px 15px;margin-top:22px;background:#FBFBF9}
 .pcttop{display:flex;align-items:baseline;flex-wrap:wrap;gap:5px;font-size:14px;color:#5A5A5A}
@@ -173,9 +181,26 @@ body{
     <div class="accent"></div>
     <p class="lead">
       20 道题，5 分钟。<br>
-      别纠结，凭第一反应选最像你此刻的那一个。<br>
-      你的公司在所有答题的人里排在哪，<br>测完你就知道了。
+      别纠结，凭第一反应选最像你此刻的那一个。
     </p>
+
+    <div class="introcard">
+      <div class="introrow">
+        <span class="n">01</span>
+        <div><b>测什么</b><p>工资、福利、领导同事、技能提升、发展前景、办公环境，六个维度。</p></div>
+      </div>
+      <div class="introrow">
+        <span class="n">02</span>
+        <div><b>怎么算</b><p>每一项分量不同，而且只要有一项烂到底，总分会被直接压下去——所以别在心里自己估。</p></div>
+      </div>
+      <div class="introrow">
+        <span class="n">03</span>
+        <div><b>你会看到</b><p>一个 1–100 分的好坏指数、你在所有答题者里的位置、还有最拖你后腿的那一项。</p></div>
+      </div>
+    </div>
+
+    <p class="lastres" id="lastres" style="display:none">你上次测过一次，<a href="javascript:;" id="btn-last">看上次的结果</a></p>
+
     <button class="btn" id="btn-start">开始测评</button>
     <p class="tiny">20 题 · 无需注册 · 不收集任何个人信息</p>
     <div class="homebottom">
@@ -749,17 +774,20 @@ function restart(){
 $('btn-again').onclick = restart;
 $('btn-restart').onclick = restart;
 
-/* 回访：有答案且已解锁，直接看结果 */
+/* 回访：永远先停在封面，只在封面上给一个"看上次结果"的入口 */
+$('btn-last').onclick = function(){
+  if (!REQUIRE_CODE || isUnlocked()) renderResult();
+  else renderLock();
+};
+
 (function boot(){
   try {
     var raw = localStorage.getItem(storeKey);
-    if (raw){
-      var a = JSON.parse(raw);
-      if (a && a.length === FLAT.length && a.every(function(x){ return typeof x === 'number'; })){
-        answers = a;
-        // 链接即付费商品：默认直接回到结果；恢复输码模式时才检查 isUnlocked()
-        if (!REQUIRE_CODE || isUnlocked()){ renderResult(); }
-      }
+    if (!raw) return;
+    var a = JSON.parse(raw);
+    if (a && a.length === FLAT.length && a.every(function(x){ return typeof x === 'number'; })){
+      answers = a;
+      $('lastres').style.display = 'block';
     }
   } catch(e){}
 })();
