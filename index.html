@@ -154,6 +154,13 @@ body{
 .footnote{font-size:12px;color:var(--lgrey);line-height:1.9;margin-top:30px;text-align:center}
 .sharebtn{margin-top:26px}
 .disclaim{font-size:11px;color:#C0C0C0;line-height:1.9;margin-top:26px;padding-top:18px;border-top:1px solid var(--line)}
+.pctband{border:1px solid var(--line);border-radius:12px;padding:16px 18px 15px;margin-top:22px;background:#FBFBF9}
+.pcttop{display:flex;align-items:baseline;flex-wrap:wrap;gap:5px;font-size:14px;color:#5A5A5A}
+.pcttop b{font-size:32px;font-weight:700;color:var(--navy);letter-spacing:-.02em;line-height:1;font-variant-numeric:tabular-nums}
+.pctbar{height:5px;background:#EDEDED;border-radius:99px;margin-top:14px;overflow:hidden}
+.pctbar i{display:block;height:100%;width:0;border-radius:99px;background:var(--navy);transition:width .9s cubic-bezier(.2,.8,.2,1)}
+.pctsign{font-size:15px;font-weight:700;color:var(--navy);margin-left:-2px}
+.pctnote{font-size:12px;line-height:1.7;color:var(--grey);margin-top:11px}
 </style>
 </head>
 <body>
@@ -166,8 +173,8 @@ body{
     <div class="accent"></div>
     <p class="lead">
       20 道题，5 分钟。<br>
-      题目和选项我全公开，<b>分数不公开</b>。<br>
-      因为算分要看你每一项的分量，<br>还要看你会不会有一项烂到底。
+      别纠结，凭第一反应选最像你此刻的那一个。<br>
+      你的公司在所有答题的人里排在哪，<br>测完你就知道了。
     </p>
     <button class="btn" id="btn-start">开始测评</button>
     <p class="tiny">20 题 · 无需注册 · 不收集任何个人信息</p>
@@ -190,21 +197,22 @@ body{
     <div class="brandline"><span class="dot"></span><span class="kicker">RESULT LOCKED</span></div>
     <div class="lockcard">
       <div class="scoremask" id="maskScore">??<small>/100</small></div>
-      <p>20 题已经答完，你的分数<b>已经算出来了</b>。<br>但我不会直接告诉你。</p>
+      <p>20 题已经答完，你的分数<b>已经算出来了</b>。<br>先看轮廓——凹进去的那一块，就是答案。</p>
     </div>
 
     <div class="radarwrap"><svg id="radarLock" viewBox="0 0 240 240"></svg></div>
     <div class="legend" id="legendLock"></div>
 
-    <div class="unlockbox">
+    <div class="unlockbox" id="unlockbox">
       <div class="unlockrow">
         <input id="code" type="text" inputmode="text" autocapitalize="characters" placeholder="输入解锁码" maxlength="20">
         <button id="btn-unlock">解锁</button>
       </div>
       <p class="hint" id="hint"></p>
     </div>
+    <button class="btn" id="btn-reveal" style="display:none;margin-top:24px">查看我的分数</button>
     <p class="tiny" style="margin-top:26px">看到那个凹陷了吗？<br>那就是拖后腿的地方。至于是哪一项，得看分数。</p>
-    <p class="tiny" style="margin-top:14px;color:#B8B8B8">请在同一台设备上完成测评与解锁，答案只存在你的手机里。</p>
+    <p class="tiny" style="margin-top:14px;color:#B8B8B8">答案只存在你手机上，换设备就得重测一次。</p>
     <button class="backbtn" id="btn-restart" style="display:block;margin:10px auto 0">重新测一次</button>
   </section>
 
@@ -218,6 +226,12 @@ body{
       <div><span class="tier" id="tier">—</span></div>
     </div>
     <p class="verdict" id="verdict"></p>
+
+    <div class="pctband">
+      <div class="pcttop"><span>你的公司，胜过</span><b id="pctbig">0</b><span class="pctsign">%</span><span>的测评者</span></div>
+      <div class="pctbar"><i id="pctfill"></i></div>
+      <div class="pctnote" id="pctnote"></div>
+    </div>
 
     <div class="sec">
       <div class="sechead"><i></i><h3>SIX DIMENSIONS</h3></div>
@@ -249,7 +263,8 @@ body{
     <button class="btn ghost sharebtn" id="btn-again">重新测一次</button>
     <p class="disclaim">
       说明：本测评基于主观自评，权重与封顶规则由作者设定，用于梳理状态而非预测结果。<br>
-      分数高低不代表你的能力，只代表你此刻在这家公司的处境。
+      分数高低不代表你的能力，只代表你此刻在这家公司的处境。<br>
+      「胜过 X% 的测评者」按评分分布估算，用于定位，不是真实问卷统计。
     </p>
   </section>
 
@@ -385,6 +400,24 @@ function calc(answers){
            flagged:flagged, capped:capped };
 }
 
+/* —— 百分位：按正态分布估算，无需服务器 ——
+   基准：均值 58 分、标准差 14 分
+   —— 校准口径：70 分（好公司线）≈ 前 20%，85 分（优质线）≈ 前 3%，
+      55 分（灰色地带下沿）≈ 中位数以下，和五档设定一致 */
+var BASE_MEAN = 58, BASE_SD = 14;
+
+function normCdf(z){
+  var t = 1 / (1 + 0.2316419 * Math.abs(z));
+  var d = 0.3989423 * Math.exp(-z * z / 2);
+  var pr = d * t * (0.3193815 + t * (-0.3565638 + t * (1.781478 + t * (-1.821256 + t * 1.330274))));
+  return z > 0 ? 1 - pr : pr;
+}
+function percentileOf(score){
+  if (!isFinite(score)) return 1;
+  var p = normCdf((score - BASE_MEAN) / BASE_SD) * 100;
+  return Math.max(1, Math.min(99, Math.round(p)));
+}
+
 var TIERS = [
   { min:85, cls:'t1', name:'优质留任区',
     v:'你可能不知道自己有多幸运。<em>这里的问题不是走不走，是怎么拿更多。</em>',
@@ -422,6 +455,10 @@ var answers = [];
 var cur = 0;
 var storeKey = 'ci_answers_v1';
 var unlockKey = 'ci_unlocked_v1';
+
+/* —— 链接本身即付费商品：默认直接展示结果，不再二次卡码 ——
+   如果以后想恢复"输码才能看"，把 REQUIRE_CODE 改成 true 即可 */
+var REQUIRE_CODE = false;
 
 /* —— 解锁码：改这里就能换码，可写多个 —— */
 var CODES = ['GPP2026'];
@@ -563,9 +600,11 @@ function renderLock(){
     s.textContent = '????';
     lg.appendChild(s);
   });
+  if ($('unlockbox')) $('unlockbox').style.display = REQUIRE_CODE ? '' : 'none';
+  if ($('btn-reveal')) $('btn-reveal').style.display = REQUIRE_CODE ? 'none' : 'block';
+
   show('s-lock');
-  $('hint').className = 'hint';
-  $('hint').textContent = '';
+  if ($('hint')){ $('hint').className = 'hint'; $('hint').textContent = ''; }
 }
 
 /* =========================================================
@@ -581,6 +620,32 @@ function renderResult(){
   $('tier').textContent = t.name;
   $('verdict').innerHTML = t.v;
   drawRadar($('radarLock'), DIMS.map(function(d){ return r.dims[d.key]; }), false);
+
+  // 胜过多少测评者
+  var pct = percentileOf(r.total);
+  var pctBig = $('pctbig'), pctFill = $('pctfill'), pctNote = $('pctnote');
+  if (pctBig){
+    pctBig.textContent = '0';
+    pctFill.style.width = '0%';
+    pctNote.textContent =
+      pct >= 90 ? '你在这套题的分布里属于极少数。这种公司不多，别轻易撒手。' :
+      pct >= 70 ? '也就是说，你已经比大多数人好。剩下的问题不是走不走，是怎么拿更多。' :
+      pct >= 50 ? '也就是说，你处在中间偏上的位置。算不上差，但也没到值得庆幸。' :
+      pct >= 30 ? '也就是说，超过一半的人，公司比你现在的更值得留。' :
+                  '也就是说，大部分人的公司，比你现在的好得多。这不是你的错觉。';
+    setTimeout(function(){
+      var t0 = null;
+      function tick(ts){
+        if (!t0) t0 = ts;
+        var k = Math.min(1, (ts - t0) / 900);
+        var e = 1 - Math.pow(1 - k, 3);
+        pctBig.textContent = Math.round(pct * e);
+        pctFill.style.width = (pct * e) + '%';
+        if (k < 1) requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
+    }, 260);
+  }
 
   // 六维明细
   var box = $('dims');
@@ -655,6 +720,8 @@ $('btn-back').onclick = function(){
   if (cur > 0){ cur--; renderQ(); }
 };
 
+if ($('btn-reveal')) $('btn-reveal').onclick = function(){ renderResult(); };
+
 $('btn-unlock').onclick = function(){
   var v = ($('code').value || '').trim().toUpperCase();
   if (!v){ $('hint').className='hint err'; $('hint').textContent = '先输入解锁码。'; return; }
@@ -690,7 +757,8 @@ $('btn-restart').onclick = restart;
       var a = JSON.parse(raw);
       if (a && a.length === FLAT.length && a.every(function(x){ return typeof x === 'number'; })){
         answers = a;
-        if (isUnlocked()){ renderResult(); }
+        // 链接即付费商品：默认直接回到结果；恢复输码模式时才检查 isUnlocked()
+        if (!REQUIRE_CODE || isUnlocked()){ renderResult(); }
       }
     }
   } catch(e){}
