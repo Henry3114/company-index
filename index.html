@@ -4,6 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="theme-color" content="#1F3864">
+<style id="toastcss">
+#toast{position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(12px);
+  background:#1F3864;color:#fff;font-size:13px;line-height:1.5;padding:10px 16px;border-radius:10px;
+  max-width:82vw;text-align:center;opacity:0;pointer-events:none;transition:.25s;z-index:200}
+#toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+</style>
 <title>公司好坏指数 · 你的公司值不值得再待一年</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%231F3864'/%3E%3C/svg%3E">
 <meta name="description" content="20 道题，5 分钟，测出你该不该继续待在这家公司。">
@@ -343,9 +349,14 @@ function calc(answers){
   DIMS.forEach(function(d){
     var sum = 0, n = 0;
     FLAT.forEach(function(f, idx){
-      if (f.dimKey === d.key){ sum += answers[idx]; n++; }
+      if (f.dimKey === d.key){
+        var av = answers[idx];
+        sum += (typeof av === 'number' && isFinite(av)) ? av : 2;   // 漏答按中性值，绝不 NaN
+        n++;
+      }
     });
-    dimScores[d.key] = (3 - sum / n) / 3 * 100;   // A→100 分，D→0 分
+    var ds = n ? (3 - sum / n) / 3 * 100 : 0;      // A→100 分，D→0 分
+    dimScores[d.key] = isFinite(ds) ? Math.max(0, Math.min(100, ds)) : 0;
   });
 
   var weighted = 0;
@@ -366,6 +377,7 @@ function calc(answers){
   if (dimScores.people < 42 && weighted > 68){ weighted = 68; capped = 'peopleMid'; }
   if (dimScores.people < 25 && weighted > 55){ weighted = 55; capped = 'people'; }
 
+  if (!isFinite(weighted)) weighted = 1;
   var total = Math.round(weighted);
   total = Math.max(1, Math.min(100, total));
 
@@ -423,6 +435,7 @@ function show(id){
 }
 
 function renderQ(){
+  var tapLock = false;          // 本题是否已经选过（防重复触发）
   var f = FLAT[cur];
   $('qidx').textContent = ('0'+(cur+1)).slice(-2) + ' / ' + FLAT.length;
   $('qdim').textContent = f.dimName;
@@ -436,11 +449,16 @@ function renderQ(){
     b.className = 'opt' + (answers[cur]===i ? ' on' : '');
     b.innerHTML = '<span class="ab">' + 'ABCD'[i] + '</span><span>' + txt + '</span>';
     b.onclick = function(){
-      answers[cur] = i;
+      if (tapLock) return;              // 同一题只认第一次点击
+      tapLock = true;
+      var idx = cur;                    // 锁死提交下标，不被后续推进的 cur 篡改
+      answers[idx] = i;
       var nodes = box.querySelectorAll('.opt');
       for (var k=0;k<nodes.length;k++) nodes[k].classList.remove('on');
       b.classList.add('on');
-      setTimeout(next, 170);
+      setTimeout(function(){
+        if (cur === idx) next();        // 只有仍停在这题才前进
+      }, 170);
     };
     box.appendChild(b);
   });
@@ -449,11 +467,20 @@ function renderQ(){
 }
 
 function next(){
+  if (typeof answers[cur] !== 'number') return;   // 本题未作答，原地不动
   if (cur < FLAT.length - 1){ cur++; renderQ(); }
   else { finish(); }
 }
 
 function finish(){
+  // 兜底：只要有题没答，跳回第一道漏答的题，绝不带着空答案算分
+  for (var i=0;i<FLAT.length;i++){
+    if (typeof answers[i] !== 'number'){
+      cur = i; renderQ(); show('s-quiz');
+      toast('第 ' + (i+1) + ' 题还没选，已经帮你跳回来了');
+      return;
+    }
+  }
   try { localStorage.setItem(storeKey, JSON.stringify(answers)); } catch(e){}
   $('qbar').style.width = '100%';
   if (isUnlocked()) { renderResult(); } else { renderLock(); }
@@ -560,6 +587,7 @@ function renderResult(){
   box.innerHTML = '';
   DIMS.forEach(function(d){
     var v = Math.round(r.dims[d.key]);
+    if (!isFinite(v)) v = 0;
     var row = document.createElement('div');
     row.className = 'dimrow';
     var tipTxt = (v < 40) ? d.tipLow : (v >= 75 ? '这一项还不错，别把它当成理所当然。' : '中间地带：能用，但不值得你为它留下来。');
@@ -667,6 +695,18 @@ $('btn-restart').onclick = restart;
     }
   } catch(e){}
 })();
+</script>
+<div id="toast"></div>
+<script>
+var toastTimer = null;
+function toast(msg){
+  var el = document.getElementById('toast');
+  if (!el) return;
+  el.textContent = msg;
+  el.classList.add('on');
+  if (toastTimer) clearTimeout(toastTimer);
+  toastTimer = setTimeout(function(){ el.classList.remove('on'); }, 2200);
+}
 </script>
 </body>
 </html>
